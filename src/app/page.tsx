@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { CameraOff, CircleDotDashed } from 'lucide-react';
 import Confetti from 'react-canvas-confetti';
+import Image from 'next/image';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -169,6 +170,13 @@ export default function Home() {
         <section className="w-full py-12 md:py-24 lg:py-32">
           <div className="container flex flex-col items-center px-4 md:px-6">
             <div className="flex flex-col items-center text-center space-y-4 max-w-3xl">
+              <Image 
+                src="https://i.postimg.cc/SNVkrFmX/361864255-293122636575506-2052512049624583768-n-removebg-preview.webp"
+                alt="Logo de Importadora Clix Copylaser"
+                width={240}
+                height={240}
+                className="h-60 w-60 mb-4"
+              />
               <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                 Cotiza tu lista de útiles en segundos
               </h1>
