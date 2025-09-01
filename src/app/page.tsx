@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader, Share2, FileDown, UploadCloud, FileText, Bot, ListChecks, LinkIcon, Camera, Video, X, CameraOff, CircleDotDashed } from 'lucide-react';
+import { Loader, Share2, FileDown, UploadCloud, FileText, Bot, ListChecks, LinkIcon, Camera, Video, X, CameraOff, CircleDotDashed, Zap } from 'lucide-react';
 import { processSchoolList } from './actions';
 import type { NormalizeAndMatchSchoolSuppliesOutput } from '@/ai/flows/normalize-and-match-school-supplies';
 import { Header } from '@/components/cotiza-listo/Header';
@@ -130,6 +130,15 @@ export default function Home() {
         throw new Error(res.error);
       }
       setResult(res.data);
+      if (res.fromCache) {
+        toast({
+            title: 'Cotización desde caché',
+            description: 'Esta lista ya había sido procesada. Mostrando resultado guardado.',
+            className: 'bg-blue-100 border-blue-300 text-blue-800',
+            duration: 5000,
+            children: <div className="p-2"><Zap className="inline-block mr-2" />Resultado instantáneo</div>
+        });
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
       toast({
