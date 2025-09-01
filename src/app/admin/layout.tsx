@@ -1,3 +1,6 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger } from "@/components/ui/sidebar";
 import { Logo } from "@/components/cotiza-listo/Logo";
 import { LayoutDashboard, Boxes, SpellCheck, DollarSign, Settings, Bell, UserCircle2 } from "lucide-react";
@@ -8,6 +11,8 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
+
   return (
     <SidebarProvider>
         <Sidebar>
@@ -18,13 +23,13 @@ export default function AdminLayout({
                 <SidebarGroup>
                     <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton href="/admin" isActive>
+                            <SidebarMenuButton href="/admin" isActive={pathname === '/admin'}>
                                 <LayoutDashboard />
                                 Dashboard
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                         <SidebarMenuItem>
-                            <SidebarMenuButton>
+                            <SidebarMenuButton href="/admin/catalog" isActive={pathname === '/admin/catalog'}>
                                 <Boxes />
                                 Catálogo
                             </SidebarMenuButton>
