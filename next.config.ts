@@ -1,10 +1,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  allowedDevOrigins: [
-      'https://*.cluster-f73ibkkuije66wssuontdtbx6q.cloudworkstations.dev'
-  ],
   typescript: {
     ignoreBuildErrors: true,
   },
