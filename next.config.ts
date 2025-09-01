@@ -2,11 +2,9 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  devIndicators: {
-    allowedDevOrigins: [
-        'https://*.cluster-f73ibkkuije66wssuontdtbx6q.cloudworkstations.dev'
-    ]
-  },
+  allowedDevOrigins: [
+      'https://*.cluster-f73ibkkuije66wssuontdtbx6q.cloudworkstations.dev'
+  ],
   typescript: {
     ignoreBuildErrors: true,
   },
