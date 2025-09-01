@@ -67,7 +67,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="marciagabrielagarzon@gmail.com"
+                placeholder="admin@cotizaclix.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -93,5 +93,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
