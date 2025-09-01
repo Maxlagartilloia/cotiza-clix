@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "setup": "node --loader ts-node/esm setup-admin.mjs"
+    "setup": "node --loader ts-node/esm setup-admin.mjs",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
