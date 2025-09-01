@@ -4,8 +4,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Cotiza Listo',
-  description: 'Sube tu lista de útiles escolares y obtén una cotización al instante.',
+  title: 'Importadora Clix Copylaser - Cotiza tu lista',
+  description: 'Sube tu lista de útiles escolares y obtén una cotización al instante con Importadora Clix Copylaser.',
   icons: {
     icon: '/icon.svg',
   },

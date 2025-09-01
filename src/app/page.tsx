@@ -3,16 +3,17 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader, Share2, FileDown, UploadCloud, FileText, Bot, ListChecks, LinkIcon, Camera, Video, X, CameraOff, CircleDotDashed, Zap } from 'lucide-react';
+import { Loader, Camera, UploadCloud, FileText, Bot, ListChecks, Zap } from 'lucide-react';
 import { processSchoolList } from './actions';
 import type { NormalizeAndMatchSchoolSuppliesOutput } from '@/ai/flows/normalize-and-match-school-supplies';
 import { Header } from '@/components/cotiza-listo/Header';
 import { QuoteTable } from '@/components/cotiza-listo/QuoteTable';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CameraOff, CircleDotDashed } from 'lucide-react';
+import Confetti from 'react-canvas-confetti';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,6 +22,7 @@ export default function Home() {
   const [result, setResult] = useState<NormalizeAndMatchSchoolSuppliesOutput | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -130,6 +132,13 @@ export default function Home() {
         throw new Error(res.error);
       }
       setResult(res.data);
+      
+      // Trigger confetti only for new quotes
+      if (!res.fromCache) {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 5000); // Stop confetti after 5 seconds
+      }
+
       if (res.fromCache) {
         toast({
             title: 'Cotización desde caché',
@@ -154,20 +163,22 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
+      {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.15} />}
       <Header />
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="mx-auto grid max-w-5xl items-center gap-6 lg:grid-cols-2 lg:gap-12">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Cotiza tu lista de útiles en segundos
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Sube, arrastra o tómale una foto a tu lista y nuestra IA la procesará para darte la mejor cotización.
-                  </p>
-                </div>
+          <div className="container flex flex-col items-center px-4 md:px-6">
+            <div className="flex flex-col items-center text-center space-y-4 max-w-3xl">
+              <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                Cotiza tu lista de útiles en segundos
+              </h1>
+              <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                Sube, arrastra o tómale una foto a tu lista y nuestra IA la procesará para darte la mejor cotización.
+              </p>
+            </div>
+            
+            <div className="mx-auto mt-10 grid max-w-5xl gap-6 lg:grid-cols-2 lg:gap-12 w-full">
+              <div className="flex flex-col justify-center items-center space-y-4">
                 <Card 
                   className="w-full max-w-lg border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10 transition-colors"
                   onDragOver={(e) => e.preventDefault()}
@@ -271,14 +282,14 @@ export default function Home() {
           <section className="w-full py-12 md:py-24">
             <div className="container px-4 md:px-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Generando tu cotización...</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Skeleton className="h-8 w-full" />
-                  <Skeleton className="h-8 w-full" />
-                  <Skeleton className="h-8 w-5/6" />
-                  <Skeleton className="h-8 w-3/4" />
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <Loader className="h-12 w-12 animate-spin text-primary" />
+                    <h2 className="text-2xl font-bold font-headline">Generando tu cotización...</h2>
+                    <p className="text-muted-foreground">Nuestra IA está trabajando. Esto puede tomar unos segundos.</p>
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -294,7 +305,7 @@ export default function Home() {
         )}
       </main>
       <footer className="flex items-center justify-center w-full h-16 border-t">
-        <p className="text-xs text-muted-foreground">&copy; 2024 Cotiza Listo. Todos los derechos reservados.</p>
+        <p className="text-xs text-muted-foreground">&copy; 2024 Importadora Clix Copylaser. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
