@@ -1,13 +1,13 @@
 /**
- * @fileOverview A service for interacting with the product catalog.
- * 
- * This service is a placeholder for a real product catalog implementation.
- * In a real-world scenario, this would connect to a database like Firestore
- * to search for products.
+ * @fileOverview A service for interacting with the product catalog in Firestore.
  */
 
-// A mock product catalog for demonstration purposes.
-// In a real application, this data would come from a database.
+import { db } from '@/lib/firebase';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
+
+const PRODUCTS_COLLECTION = 'products';
+
+// The mock catalog is kept for fallback or testing purposes, but is no longer the primary source.
 const MOCK_CATALOG = [
   { productId: 'prod-001', productName: 'Cuaderno Profesional 100 Hojas Raya', keywords: ['cuaderno', 'libreta', 'raya'] },
   { productId: 'prod-002', productName: 'Cuaderno Profesional 100 Hojas Cuadro 7mm', keywords: ['cuaderno', 'libreta', 'cuadro chico', 'c7'] },
@@ -29,23 +29,48 @@ export interface Product {
 }
 
 /**
- * Searches the product catalog for a given query.
- * This is a mock implementation and performs a simple keyword search.
- * @param query The search query.
+ * Searches the product catalog in Firestore for a given query.
+ * It searches for keywords in a 'searchKeywords' array field in the documents.
+ * @param searchQuery The search query.
  * @returns A promise that resolves to an array of matching products.
  */
-export async function searchProducts(query: string): Promise<Product[]> {
-  console.log(`Searching for: "${query}"`);
+export async function searchProducts(searchQuery: string): Promise<Product[]> {
+  console.log(`Searching for: "${searchQuery}" in Firestore.`);
 
-  const queryWords = query.toLowerCase().split(/\s+/);
+  const productsCollection = collection(db, PRODUCTS_COLLECTION);
+  // Firestore doesn't support full-text search natively.
+  // A common pattern is to store keywords in an array and use 'array-contains-any'.
+  // We'll search for the first few words of the query.
+  const queryWords = searchQuery.toLowerCase().split(/\s+/).slice(0, 10);
 
-  const results = MOCK_CATALOG.filter(product => {
-    return queryWords.some(queryWord => 
-        product.productName.toLowerCase().includes(queryWord) || 
-        product.keywords.some(keyword => keyword.includes(queryWord))
-    );
-  }).map(({ productId, productName }) => ({ productId, productName }));
+  if (queryWords.length === 0) {
+    return [];
+  }
 
-  console.log(`Found ${results.length} results.`);
-  return results;
+  try {
+    const q = query(productsCollection, where('searchKeywords', 'array-contains-any', queryWords), limit(5));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        console.log('No matching products found in Firestore.');
+        return [];
+    }
+
+    const results: Product[] = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        // The document ID is assumed to be the productId
+        productId: doc.id, 
+        // Ensure the fields exist on the document
+        productName: data.productName || 'Nombre no disponible',
+      };
+    });
+
+    console.log(`Found ${results.length} results in Firestore.`);
+    return results;
+  } catch (error) {
+    console.error("Error searching products in Firestore:", error);
+    // Fallback or re-throw error
+    return [];
+  }
 }
