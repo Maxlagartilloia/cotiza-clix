@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { searchProducts } from '@/services/product-catalog-service';
 
 const NormalizeAndMatchSchoolSuppliesInputSchema = z.object({
   extractedItems: z
@@ -40,22 +41,49 @@ export async function normalizeAndMatchSchoolSupplies(
   return normalizeAndMatchSchoolSuppliesFlow(input);
 }
 
+const findMatchingProductTool = ai.defineTool(
+    {
+        name: 'findMatchingProduct',
+        description: 'Finds a matching product in the catalog for a given school supply item.',
+        inputSchema: z.object({
+            query: z.string().describe('The name of the school supply to search for.'),
+        }),
+        outputSchema: z.object({
+            productId: z.string().optional(),
+            productName: z.string().optional(),
+        }),
+    },
+    async (input) => {
+        const results = await searchProducts(input.query);
+        if (results.length > 0) {
+            return results[0]; // Return the top match
+        }
+        return {};
+    }
+);
+
+
 const prompt = ai.definePrompt({
   name: 'normalizeAndMatchSchoolSuppliesPrompt',
   input: {
     schema: NormalizeAndMatchSchoolSuppliesInputSchema,
   },
   output: {schema: NormalizeAndMatchSchoolSuppliesOutputSchema},
-  prompt: `You are an expert in school supplies and product catalogs.
+  tools: [findMatchingProductTool],
+  prompt: `You are an expert in school supplies. Your task is to process a list of extracted school supply items.
 
-  Your task is to normalize the names of the extracted school supplies and match them against a product catalog.
-  If you find a match, return the product ID and product name from the catalog.
+For each item in the list, you MUST perform these steps:
+1. Normalize the item name. For example, "caja de 12 lapices de colores" should become "Lápices de colores (caja x12)".
+2. Use the 'findMatchingProduct' tool to search for the normalized name in the product catalog.
+3. Based on the tool's result, determine a confidence score between 0 and 1. A score of 1 means a perfect match, while a score below 0.5 indicates a very low-confidence match or no match found.
+4. If the tool returns a product, include its 'productId' and 'productName'. If not, you can omit them.
+5. Compile a list of all processed items with their normalized name, match details (if any), and the confidence score.
 
-  Extracted Items:
-  {{#each extractedItems}}- {{{this}}}
-  {{/each}}
+Return the final list of matched items.
 
-  Return the normalized name, product ID (if found), product name (if found), and a confidence score (0-1) for each item.
+Extracted Items:
+{{#each extractedItems}}- {{{this}}}
+{{/each}}
   `,
 });
 
