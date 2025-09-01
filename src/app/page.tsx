@@ -167,16 +167,9 @@ export default function Home() {
       {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.15} />}
       <Header />
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32">
+        <section className="w-full py-8 md:py-12 lg:py-16">
           <div className="container flex flex-col items-center px-4 md:px-6">
             <div className="flex flex-col items-center text-center space-y-4 max-w-3xl">
-              <Image 
-                src="https://i.postimg.cc/SNVkrFmX/361864255-293122636575506-2052512049624583768-n-removebg-preview.webp"
-                alt="Logo de Importadora Clix Copylaser"
-                width={240}
-                height={240}
-                className="h-60 w-60 mb-4"
-              />
               <h1 className="font-headline text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                 Cotiza tu lista de útiles en segundos
               </h1>
