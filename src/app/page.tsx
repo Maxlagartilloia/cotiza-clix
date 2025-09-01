@@ -182,7 +182,7 @@ export default function Home() {
                 Cotiza tu lista de útiles en segundos
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                Sube, arrastra o tómale una foto a tu lista y nuestra IA la procesará para darte la mejor cotización.
+                 Sube, arrastra o tómale una foto a tu lista y nuestra IA la procesará para darte la mejor cotización con Cotiza Clix.
               </p>
             </div>
             

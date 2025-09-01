@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { app } from '@/lib/firebase';
-import { Logo } from '@/components/cotiza-listo/Logo';
+import { Logo } from '@/components/cotiza-clix/Logo';
 import { Loader } from 'lucide-react';
 
 const auth = getAuth(app);
@@ -93,3 +93,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    

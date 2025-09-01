@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger } from "@/components/ui/sidebar";
-import { Logo } from "@/components/cotiza-listo/Logo";
+import { Logo } from "@/components/cotiza-clix/Logo";
 import { LayoutDashboard, Boxes, SpellCheck, DollarSign, Settings, UserCircle2, LogOut, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/hooks/use-auth';
@@ -103,3 +103,5 @@ export default function AdminLayout({
     </SidebarProvider>
   )
 }
+
+    
