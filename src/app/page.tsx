@@ -1,25 +1,72 @@
 'use client';
 
-import { useState } from 'react';
-import type { ChangeEvent } from 'react';
+import { useState, useRef, useEffect, type ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader, Share2, FileDown, UploadCloud, FileText, Bot, ListChecks, LinkIcon } from 'lucide-react';
+import { Loader, Share2, FileDown, UploadCloud, FileText, Bot, ListChecks, LinkIcon, Camera, Video, X, CameraOff, CircleDotDashed } from 'lucide-react';
 import { processSchoolList } from './actions';
 import type { NormalizeAndMatchSchoolSuppliesOutput } from '@/ai/flows/normalize-and-match-school-supplies';
 import { Header } from '@/components/cotiza-listo/Header';
 import { QuoteTable } from '@/components/cotiza-listo/QuoteTable';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<NormalizeAndMatchSchoolSuppliesOutput | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Stop video stream when camera is closed
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const openCamera = async () => {
+    setShowCamera(true);
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        setHasCameraPermission(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error("Error accessing camera: ", error);
+        setHasCameraPermission(false);
+        toast({
+          title: 'Error de cámara',
+          description: 'No se pudo acceder a la cámara. Revisa los permisos en tu navegador.',
+          variant: 'destructive',
+        });
+      }
+    } else {
+      setHasCameraPermission(false);
+    }
+  };
+
+  const closeCamera = () => {
+    setShowCamera(false);
+    if (videoRef.current && videoRef.current.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
+  
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -39,12 +86,33 @@ export default function Home() {
       setResult(null);
     }
   };
+  
+  const takePicture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      context?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      
+      canvas.toBlob(blob => {
+        if (blob) {
+          const newFile = new File([blob], 'captura-utiles.jpg', { type: 'image/jpeg' });
+          setFile(newFile);
+          setFileName(newFile.name);
+          setResult(null);
+          closeCamera();
+        }
+      }, 'image/jpeg');
+    }
+  };
 
   const handleSubmit = async () => {
     if (!file) {
       toast({
         title: 'Error',
-        description: 'Por favor, selecciona un archivo primero.',
+        description: 'Por favor, selecciona un archivo o toma una foto primero.',
         variant: 'destructive',
       });
       return;
@@ -88,7 +156,7 @@ export default function Home() {
                     Cotiza tu lista de útiles en segundos
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Sube tu lista en cualquier formato (PDF, DOCX, JPG) y nuestra IA la procesará para darte la mejor cotización.
+                    Sube, arrastra o tómale una foto a tu lista y nuestra IA la procesará para darte la mejor cotización.
                   </p>
                 </div>
                 <Card 
@@ -100,11 +168,17 @@ export default function Home() {
                     <UploadCloud className="h-12 w-12 text-primary" />
                     <div className="space-y-2">
                       <p className="font-semibold">Arrastra y suelta tu archivo o</p>
-                      <Button asChild variant="outline">
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          Selecciona un archivo
-                        </label>
-                      </Button>
+                      <div className="flex gap-2 justify-center">
+                          <Button asChild variant="outline">
+                            <label htmlFor="file-upload" className="cursor-pointer">
+                              Selecciona un archivo
+                            </label>
+                          </Button>
+                          <Button variant="outline" onClick={openCamera}>
+                              <Camera className="mr-2 h-4 w-4"/>
+                              Tomar Foto
+                          </Button>
+                      </div>
                       <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" />
                     </div>
                     {fileName && <p className="text-sm text-muted-foreground">Archivo: {fileName}</p>}
@@ -148,6 +222,41 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <Dialog open={showCamera} onOpenChange={setShowCamera}>
+          <DialogContent className="sm:max-w-[625px]">
+            <DialogHeader>
+              <DialogTitle>Capturar Lista de Útiles</DialogTitle>
+            </DialogHeader>
+            <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+              <video ref={videoRef} className="h-full w-full object-cover" autoPlay playsInline muted />
+              <canvas ref={canvasRef} className="hidden" />
+              {hasCameraPermission === false && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 text-white">
+                  <CameraOff className="h-16 w-16" />
+                  <p className="text-center text-lg">Cámara no disponible.</p>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Asegúrate de haber concedido los permisos en tu navegador.
+                  </p>
+                </div>
+              )}
+               {hasCameraPermission === null && (
+                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 text-white">
+                  <CircleDotDashed className="h-16 w-16 animate-spin" />
+                  <p className="text-center text-lg">Iniciando cámara...</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={closeCamera}>Cancelar</Button>
+              <Button onClick={takePicture} disabled={!hasCameraPermission}>
+                <Camera className="mr-2 h-4 w-4" />
+                Tomar Foto
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         {loading && (
           <section className="w-full py-12 md:py-24">
