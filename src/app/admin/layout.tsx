@@ -3,8 +3,13 @@
 import { usePathname } from 'next/navigation';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarHeader, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger } from "@/components/ui/sidebar";
 import { Logo } from "@/components/cotiza-listo/Logo";
-import { LayoutDashboard, Boxes, SpellCheck, DollarSign, Settings, Bell, UserCircle2 } from "lucide-react";
+import { LayoutDashboard, Boxes, SpellCheck, DollarSign, Settings, UserCircle2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 export default function AdminLayout({
   children,
@@ -12,6 +17,25 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  if (loading) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <Logo />
+                <p>Verificando acceso...</p>
+                <Skeleton className="h-8 w-48" />
+            </div>
+        </div>
+    );
+  }
+
+  if (!user) {
+    router.replace('/login');
+    return null;
+  }
 
   return (
     <SidebarProvider>
@@ -52,15 +76,9 @@ export default function AdminLayout({
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton>
-                            <Settings />
-                            Configuración
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton>
-                            <UserCircle2 />
-                            Mi Perfil
+                         <SidebarMenuButton onClick={logout}>
+                            <LogOut />
+                            Cerrar Sesión
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
@@ -75,9 +93,10 @@ export default function AdminLayout({
                 <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
                     <Bell />
                 </Button>
-                <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
-                    <UserCircle2 />
-                </Button>
+                <Avatar>
+                    <AvatarImage src={user.photoURL || undefined} alt="Admin" />
+                    <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
             </header>
             <main className="p-4 sm:px-6 sm:py-0">{children}</main>
         </SidebarInset>
