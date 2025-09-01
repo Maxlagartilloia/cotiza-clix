@@ -6,7 +6,7 @@ export default function AdminDashboard() {
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
-        <p className="text-muted-foreground">Bienvenido al panel de administración de Cotiza Listo.</p>
+        <p className="text-muted-foreground">Bienvenido al panel de administración de Cotiza Clix.</p>
       </header>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

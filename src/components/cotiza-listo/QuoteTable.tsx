@@ -56,7 +56,7 @@ export function QuoteTable({ quoteResult }: QuoteTableProps) {
   };
 
   const handleShare = () => {
-    let message = '¡Hola! He generado una cotización con Cotiza Listo:\n\n';
+    let message = '¡Hola! He generado una cotización con Cotiza Clix:\n\n';
     items.forEach(item => {
       if (item.quantity > 0) {
         message += `* ${item.quantity}x ${item.productName || item.normalizedName} - ${formatCurrency((item.price || 0) * item.quantity)}\n`;

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
-  title: 'Importadora Clix Copylaser - Cotiza tu lista',
+  title: 'Cotiza Clix - Importadora Clix Copylaser',
   description: 'Sube tu lista de útiles escolares y obtén una cotización al instante con Importadora Clix Copylaser.',
   icons: {
     icon: '/icon.svg',
