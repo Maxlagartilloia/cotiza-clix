@@ -5,7 +5,6 @@
 # This configuration is required for Firebase App Hosting to properly build and serve a Next.js app.
 framework:
   name: nextjs
-  version: 20
 
 # Settings to manage and configure a Firebase App Hosting backend.
 runConfig:
